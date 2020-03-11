@@ -31,7 +31,7 @@ div {
     word-break: break-word;
     &.jsoneditor-empty {
       &::after {
-        content: "value";
+        content:attr(data-text)
       }
     }
     &.jsoneditor-string {
