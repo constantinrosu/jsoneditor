@@ -1943,6 +1943,10 @@ export class Node {
     if (!inputElement) {
       return
     }
+    
+    if (this.schema.default) {
+		  inputElement.setAttribute('data-text',  this.schema.default);
+	  }
 
     if (this.value === this.schema.default) {
       inputElement.title = translate('default')
