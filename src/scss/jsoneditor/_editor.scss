@@ -29,6 +29,12 @@ div.jsoneditor-value p {
 div {
   &.jsoneditor-value {
     word-break: break-word;
+	
+	&::after {
+		color:  $jse-empty;;
+        content:' ' attr(data-text)
+      }
+	
     &.jsoneditor-empty {
       &::after {
         content:attr(data-text)
