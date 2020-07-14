@@ -41,6 +41,8 @@ export function repair (jsString) {
   // escape all single and double quotes inside strings
   const chars = []
   let i = 0
+  let indent = 0
+  let isLineSeparatedJson = false
 
   // If JSON starts with a function (characters/digits/"_-"), remove this function.
   // This is useful for "stripping" JSONP objects to become JSON
@@ -107,21 +109,49 @@ export function repair (jsString) {
     return jsString[iNext]
   }
 
+  // get at the first non-white space character starting at the current character
+  function currNonWhiteSpace () {
+    let iNext = i
+    while (iNext < jsString.length && isWhiteSpace(jsString[iNext])) {
+      iNext++
+    }
+
+    return jsString[iNext]
+  }
+
   // skip a block comment '/* ... */'
   function skipBlockComment () {
-    i += 2
-    while (i < jsString.length && (curr() !== '*' || next() !== '/')) {
-      i++
+    if (curr() === '/' && next() === '*') {
+      i += 2
+      while (i < jsString.length && (curr() !== '*' || next() !== '/')) {
+        i++
+      }
+      i += 2
+
+      if (curr() === '\n') {
+        i++
+      }
     }
-    i += 2
   }
 
   // skip a comment '// ...'
   function skipComment () {
-    i += 2
-    while (i < jsString.length && (curr() !== '\n')) {
+    if (curr() === '/' && next() === '/') {
+      i += 2
+      while (i < jsString.length && (curr() !== '\n')) {
+        i++
+      }
+    }
+  }
+
+  function parseWhiteSpace () {
+    let whitespace = ''
+    while (i < jsString.length && isWhiteSpace(curr())) {
+      whitespace += curr()
       i++
     }
+
+    return whitespace
   }
 
   /**
@@ -245,13 +275,19 @@ export function repair (jsString) {
   }
 
   while (i < jsString.length) {
+    skipBlockComment()
+    skipComment()
+
     const c = curr()
 
-    if (c === '/' && next() === '*') {
-      skipBlockComment()
-    } else if (c === '/' && next() === '/') {
-      skipComment()
-    } else if (isSpecialWhiteSpace(c)) {
+    if (c === '{') {
+      indent++
+    }
+    if (c === '}') {
+      indent--
+    }
+
+    if (isSpecialWhiteSpace(c)) {
       // special white spaces (like non breaking space)
       chars.push(' ')
       i++
@@ -265,6 +301,21 @@ export function repair (jsString) {
       chars.push(parseString(quoteRight))
     } else if (c === quoteDblLeft) {
       chars.push(parseString(quoteDblRight))
+    } else if (c === '}') {
+      // check for missing comma between objects
+      chars.push(c)
+      i++
+
+      const whitespaces = parseWhiteSpace()
+      skipBlockComment()
+
+      if (currNonWhiteSpace() === '{') {
+        chars.push(',')
+        if (indent === 0) {
+          isLineSeparatedJson = true
+        }
+      }
+      chars.push(whitespaces)
     } else if (c === ',' && [']', '}'].indexOf(nextNonWhiteSpace()) !== -1) {
       // skip trailing commas
       i++
@@ -278,6 +329,11 @@ export function repair (jsString) {
       chars.push(c)
       i++
     }
+  }
+
+  if (isLineSeparatedJson) {
+    chars.unshift('[\n')
+    chars.push('\n]')
   }
 
   return chars.join('')
@@ -607,7 +663,6 @@ export function setSelectionOffset (params) {
     }
   }
 }
-
 /**
  * Get the inner text of an HTML element (for example a div element)
  * @param {Element} element
@@ -618,21 +673,28 @@ export function getInnerText (element, buffer) {
   const first = (buffer === undefined)
   if (first) {
     buffer = {
-      text: '',
+      _text: '',
       flush: function () {
-        const text = this.text
-        this.text = ''
+        const text = this._text
+        this._text = ''
         return text
       },
       set: function (text) {
-        this.text = text
+        this._text = text
       }
     }
   }
 
   // text node
   if (element.nodeValue) {
-    return buffer.flush() + element.nodeValue
+    // remove return characters and the whitespace surrounding return characters
+    const trimmedValue = element.nodeValue.replace(/\s*\n\s*/g, '')
+    if (trimmedValue !== '') {
+      return buffer.flush() + trimmedValue
+    } else {
+      // ignore empty text
+      return ''
+    }
   }
 
   // divs or other HTML elements
@@ -647,7 +709,9 @@ export function getInnerText (element, buffer) {
         const prevChild = childNodes[i - 1]
         const prevName = prevChild ? prevChild.nodeName : undefined
         if (prevName && prevName !== 'DIV' && prevName !== 'P' && prevName !== 'BR') {
-          innerText += '\n'
+          if (innerText !== '') {
+            innerText += '\n'
+          }
           buffer.flush()
         }
         innerText += getInnerText(child, buffer)
@@ -661,15 +725,6 @@ export function getInnerText (element, buffer) {
     }
 
     return innerText
-  } else {
-    if (element.nodeName === 'P' && getInternetExplorerVersion() !== -1) {
-      // On Internet Explorer, a <p> with hasChildNodes()==false is
-      // rendered with a new line. Note that a <p> with
-      // hasChildNodes()==true is rendered without a new line
-      // Other browsers always ensure there is a <br> inside the <p>,
-      // and if not, the <p> does not render a new line
-      return buffer.flush()
-    }
   }
 
   // br or unknown

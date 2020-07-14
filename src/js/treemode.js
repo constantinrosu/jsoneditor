@@ -127,6 +127,7 @@ treemode._setOptions = function (options) {
     autocomplete: null,
     navigationBar: true,
     mainMenuBar: true,
+    limitDragging: false,
     onSelectionChange: null,
     colorPicker: true,
     onColorPicker: function (parent, color, onChange) {
@@ -169,6 +170,11 @@ treemode._setOptions = function (options) {
     Object.keys(options).forEach(prop => {
       this.options[prop] = options[prop]
     })
+
+    // default limitDragging to true when a JSON schema is defined
+    if (options.limitDragging == null && options.schema != null) {
+      this.options.limitDragging = true
+    }
   }
 
   // compile a JSON schema validator if a JSON schema is provided
@@ -1211,7 +1217,7 @@ treemode._updateTreePath = function (pathNodes) {
   function getName (node) {
     return node.parent
       ? ((node.parent.type === 'array') ? node.index : node.field)
-      : node.type
+      : (node.field || node.type)
   }
 }
 

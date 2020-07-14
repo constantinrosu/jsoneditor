@@ -3,9 +3,91 @@
 https://github.com/josdejong/jsoneditor
 
 
+## not yet published, version 9.0.4
+
+- Updated dependencies to `ace-builds@1.4.12`, `ajv@6.12.3`.
+
+
+## 2020-07-02, version 9.0.3
+
+- Fix regression introduced in `v9.0.2` in the select boxes in the 
+  Transform model not lighlighting the matches correctly.
+
+
+## 2020-07-01, version 9.0.2
+
+- Fix #1029: XSS vulnerabilities. Thanks @onemoreflag for reporting.
+- Fix #1017: unable to style the color of a value containing a color.
+  Thanks @p3x-robot. 
+
+
+## 2020-06-24, version 9.0.1
+
+- Fixed broken link to the Ace editor website (https://ace.c9.io/).
+  Thanks @p3x-robot.
+- Fix #1027: create IE11 Array polyfills `find` and `findIndex` in such a way 
+  that they are not iterable.
+
+
+## 2020-05-24, version 9.0.0
+
+- Implemented option `limitDragging`, see #962. This is a breaking change when 
+  using a JSON schema: dragging is more restrictive by default in that case.
+  Set `limitDragging: false` to keep the old, non-restricted behavior.
+
+
+## 2020-05-13, version 8.6.8
+
+- Fix #936: too many return characters inserted when pasting formatted text
+  from OpenOffice.
+
+
+## 2020-05-10, version 8.6.7
+
+- Fix #858: the `dist/jsoneditor.js` bundle containing a link to a 
+  non-existing source map.
+- Fix #978: in some special cases the caret was jumping to the beginning of the 
+  line whilst typing.
+- Update dependencies to `ajv@6.12.2`.
+
+
+## 2020-04-21, version 8.6.6
+
+- Fix #969: adding a new property to an empty object or array is broken.
+  Regression introduced in `v8.6.5`.
+
+
+## 2020-04-19, version 8.6.5
+
+- Fix #964: translation of titles of some context menu items not working.
+- Update dependencies to `ace-builds@1.4.11`, `ajv@6.12.1`.
+
+
+## 2020-03-29, version 8.6.4
+
+- Fix #921: `sortObjectKeys` emits `onChange` events.
+- Fix #946: `language` not working in modes `text`, `code`, and `preview`.
+- Revert reckoning with the order of object properties when updating an
+  object (introduced in `v8.6.2`). See #917. 
+- Implement support for repairing line separate JSON. 
+
+
+## 2020-03-18, version 8.6.3
+
+- Fix #932: `JSONEditor.update` broken, did not always recognize when the 
+  input changed. Regression introduced in `v8.6.2`. 
+
+
+## 2020-03-18, version 8.6.2
+
+- Fixed #917, #926: Keep order of properties when updating an object.  
+- Fixed #928: Custom root name not reflected in path of navigation bar.
+- Upgraded to `ajv@6.12.0`
+
+
 ## 2020-02-17, version 8.6.1
 
-- Fix #908: editor throwing an exception when switching from `'preview'`
+- Fixed #908: editor throwing an exception when switching from `'preview'`
   to `'code'` mode.
 
 

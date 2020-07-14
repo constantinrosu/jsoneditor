@@ -222,11 +222,15 @@ Constructs a new JSONEditor.
 
 - `{boolean} escapeUnicode`
 
-  If true, unicode characters are escaped and displayed as their hexadecimal code (like `\u260E`) instead of of the character itself (like `☎`). `false` by default.
+  If `true`, unicode characters are escaped and displayed as their hexadecimal code (like `\u260E`) instead of of the character itself (like `☎`). `false` by default.
 
 - `{boolean} sortObjectKeys`
 
-  If true, object keys in 'tree', 'view' or 'form' mode list be listed alphabetically instead by their insertion order. Sorting is performed using a natural sort algorithm, which makes it easier to see objects that have string numbers as keys. `false` by default.
+  If `true`, object keys in 'tree', 'view' or 'form' mode list be listed alphabetically instead by their insertion order. Sorting is performed using a natural sort algorithm, which makes it easier to see objects that have string numbers as keys. `false` by default.
+
+- `{boolean} limitDragging`
+
+  If `false`, nodes can be dragged from any parent node to any other parent node. If `true`, nodes can only be dragged inside the same parent node, which effectively only allows reordering of nodes. By default, `limitDragging` is `true` when no JSON `schema` is defined, and `false` otherwise.
 
 - `{boolean} history`
 
@@ -437,6 +441,14 @@ Constructs a new JSONEditor.
   }
   ```
   Only applicable when `mode` is 'form', 'tree' or 'view'.  
+
+- `{function} onFocus({ type: 'focus', target })`
+  Callback method, triggered when the editor comes into focus, 
+  passing an object `{type, target}`, Applicable for all modes.
+
+- `{function} onBlur({ type: 'blur', target })`
+  Callback method, triggered when the editor goes out of focus, 
+  passing an object `{type, target}`, Applicable for all modes.
 
 - `{boolean} colorPicker`
 
@@ -755,7 +767,7 @@ See also `JSONEditor.update(json)`.
 
 #### `JSONEditor.setMode(mode)`
 
-Switch mode. Mode `code` requires the [Ace editor](http://ace.ajax.org/).
+Switch mode. Mode `code` requires the [Ace editor](https://ace.c9.io/).
 
 *Parameters:*
 
